@@ -1,6 +1,10 @@
+import java.util.Scanner;
+import menu.HeadMenu;
+
 public class Main {
 
   public static void main(String[] args) {
-    System.out.println("Hello world!");
+    Scanner sc = new Scanner(System.in);
+    HeadMenu.apply(sc);
   }
 }
