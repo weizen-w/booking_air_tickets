@@ -8,7 +8,7 @@ public class MenuMethods {
   private MenuMethods() {
   }
 
-  public static void printMenu(Map<String, String> map) {
+  private static void printMenu(Map<String, String> map) {
     for (Map.Entry<String, String> rowMenu : map.entrySet()) {
       System.out.println(rowMenu.getKey() + ". " + rowMenu.getValue());
     }
