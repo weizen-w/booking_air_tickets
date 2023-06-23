@@ -1,15 +1,20 @@
 package menu;
 
 import aviation.Airport;
+import aviation.Flight;
 import database.Client;
 import database.Database;
+import database.Reservation;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 import location.City;
 import location.Country;
+import service.ReadCSVFile;
+import service.WriteCSVFile;
 
 public class ClientMenu {
 
@@ -78,23 +83,36 @@ public class ClientMenu {
     Country countryArrival = Country.select(sc);
     City cityArrival = City.select(countryArrival, sc);
     Airport airportArrival = Airport.select(cityArrival, sc);
-//    System.out.print("Введите дату в формате (dd.MM.yyyy): ");
-//    Date date;
-//    try {
-//      date = dateFormat.parse(sc.nextLine());
-//    } catch (ParseException e) {
-//      throw new RuntimeException();
-//    }
+    airportDeparture.flightMap = Airport.readFlightMap(airportDeparture, airportArrival);
     airportDeparture.flightMap.entrySet().stream()
-        .filter(x -> x.getValue().contains(airportArrival.code))
+        .filter(x -> x.getValue().airportArrival.code.contains(airportArrival.code))
         .forEach(System.out::println);
-//    System.out.print("Для бронирования введите номер рейса: ");
-//    String num = sc.nextLine();
-//    while (!airportDeparture.airportList.containsKey(num)) {
-//      System.out.print("Вы ввели не существующий номер рейса, пожалуйста повторите ввод: ");
-//      num = sc.nextLine();
-//    }
+    addReservation(sc, airportDeparture, client);
+  }
 
+  private static void addReservation(Scanner sc, Airport airportDeparture, Client client) {
+    System.out.print("Для бронирования введите номер рейса: ");
+    String num = sc.nextLine();
+    while (!airportDeparture.flightMap.containsKey(num)) {
+      System.out.print("Вы ввели не существующий номер рейса, пожалуйста повторите ввод: ");
+      num = sc.nextLine();
+    }
+    Flight flight = airportDeparture.flightMap.get(num);
+    flight.reservationList = Flight.readReservationList(flight);
+    System.out.println("Укажите кол-во мест для бронирования: ");
+    int amountPassenger = sc.nextInt();
+    Reservation reservation = new Reservation(client.login, amountPassenger);
+    reservation.priceTotal = flight.airplane.price * amountPassenger;
+    flight.airplane.seatFree -= amountPassenger;
+    flight.reservationList.add(reservation);
+    try {
+      WriteCSVFile.writeReservation(flight.filePathToReservations, flight.reservationList);
+    } catch (IOException e) {
+      throw new RuntimeException();
+    }
+    System.out.println("Ваше бронирование: ");
+    System.out.println(reservation);
+    System.out.println("Успешно сохранено!!!");
   }
 
   public static void apply(Scanner sc) {
