@@ -1,5 +1,6 @@
 package menu;
 
+import aviation.Airport;
 import database.Client;
 import database.Database;
 import java.io.FileNotFoundException;
@@ -7,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
+import location.City;
+import location.Country;
 
 public class ClientMenu {
 
@@ -26,6 +29,7 @@ public class ClientMenu {
 
   static {
     Client client = checkLogin();
+    actions.put(SEARCH_BOOKING, () -> search(client));
     actions.put(LOGOUT, System.out::close);
   }
 
@@ -63,5 +67,42 @@ public class ClientMenu {
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private static void search(Client client) {
+    Scanner sc = new Scanner(System.in);
+    System.out.println("+++ +++ Поиск и бронирование +++ +++");
+    Country countryDeparture = Country.select(sc);
+    City cityDeparture = City.select(countryDeparture, sc);
+    Airport airportDeparture = Airport.select(cityDeparture, sc);
+    Country countryArrival = Country.select(sc);
+    City cityArrival = City.select(countryArrival, sc);
+    Airport airportArrival = Airport.select(cityArrival, sc);
+//    System.out.print("Введите дату в формате (dd.MM.yyyy): ");
+//    Date date;
+//    try {
+//      date = dateFormat.parse(sc.nextLine());
+//    } catch (ParseException e) {
+//      throw new RuntimeException();
+//    }
+    airportDeparture.flightMap.entrySet().stream()
+        .filter(x -> x.getValue().contains(airportArrival.code))
+        .forEach(System.out::println);
+//    System.out.print("Для бронирования введите номер рейса: ");
+//    String num = sc.nextLine();
+//    while (!airportDeparture.airportList.containsKey(num)) {
+//      System.out.print("Вы ввели не существующий номер рейса, пожалуйста повторите ввод: ");
+//      num = sc.nextLine();
+//    }
+
+  }
+
+  public static void apply(Scanner sc) {
+    String command = MenuMethods.selectMenu(description, sc);
+    if (!actions.containsKey(command)) {
+      throw new IllegalArgumentException("Некорректная команда: " + command);
+    }
+    Runnable action = actions.get(command);
+    action.run();
   }
 }

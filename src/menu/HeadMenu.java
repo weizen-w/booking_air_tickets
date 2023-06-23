@@ -31,7 +31,7 @@ public class HeadMenu {
 
   static {
     actions.put(REGISTRATION, menu.HeadMenu::registration);
-    actions.put(LOGIN_CLIENT, ClientMenu::checkLogin);
+    actions.put(LOGIN_CLIENT, () -> ClientMenu.apply(new Scanner(System.in)));
     actions.put(EXIT, () -> System.exit(0));
   }
 
