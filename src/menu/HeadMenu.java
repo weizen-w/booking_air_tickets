@@ -31,7 +31,11 @@ public class HeadMenu {
 
   static {
     actions.put(REGISTRATION, menu.HeadMenu::registration);
-    actions.put(LOGIN_CLIENT, () -> ClientMenu.apply(new Scanner(System.in)));
+    actions.put(LOGIN_CLIENT, () -> {
+      while (true) {
+        ClientMenu.apply(new Scanner(System.in));
+      }
+    });
     actions.put(EXIT, () -> System.exit(0));
   }
 
