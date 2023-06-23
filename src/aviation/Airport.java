@@ -15,8 +15,8 @@ public class Airport {
   public static final String SEPARATOR = ";";
 
   public final String code;
-  public final City city;
-  public final String airportFolder;
+  public City city;
+  public String airportFolder;
 
   public Map<String, Flight> flightMap;
 
@@ -26,10 +26,14 @@ public class Airport {
     airportFolder = city.cityFolder + code + "/";
   }
 
-  public static Map<String, Flight> readFlightMap(Airport airportDep, Airport airportArr) {
+  public Airport(String code) {
+    this.code = code;
+  }
+
+  public static Map<String, Flight> readFlightMap(Airport airportDeparture) {
     Scanner sc;
     try {
-      sc = new Scanner(new FileReader(airportDep.airportFolder + FilePath.FILE_FLIGHTS));
+      sc = new Scanner(new FileReader(airportDeparture.airportFolder + FilePath.FILE_FLIGHTS));
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
@@ -38,6 +42,8 @@ public class Airport {
       String line = sc.nextLine();
       String[] arrayLine = line.split(SEPARATOR);
       String number = arrayLine[0];
+      Airport airportDep = new Airport(arrayLine[1]);
+      Airport airportArr = new Airport(arrayLine[2]);
       Airplane airplane = new Airplane(arrayLine[3]);
       String timeDeparture = arrayLine[4];
       String timeArrival = arrayLine[5];
@@ -45,7 +51,7 @@ public class Airport {
       try {
         flight = new Flight(number, airportDep, airportArr, airplane, timeDeparture, timeArrival);
       } catch (ParseException e) {
-        throw new RuntimeException();
+        throw new RuntimeException(e);
       }
       map.put(number, flight);
     }
