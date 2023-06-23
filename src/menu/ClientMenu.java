@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Scanner;
 import location.City;
 import location.Country;
-import service.ReadCSVFile;
 import service.WriteCSVFile;
 
 public class ClientMenu {
@@ -27,7 +26,7 @@ public class ClientMenu {
   static {
     description.put(SEARCH_BOOKING, "Поиск и бронирование билетов");
     description.put(MY_BOOKINGS, "Мои бронирования");
-    description.put(LOGOUT, "Выйти из учетной записи");
+    description.put(LOGOUT, "Выйти в главное меню");
   }
 
   public static final Map<String, Runnable> actions = new LinkedHashMap<>();
@@ -35,7 +34,6 @@ public class ClientMenu {
   static {
     Client client = checkLogin();
     actions.put(SEARCH_BOOKING, () -> search(client));
-    actions.put(LOGOUT, System.out::close);
   }
 
   private ClientMenu() {
@@ -83,11 +81,15 @@ public class ClientMenu {
     Country countryArrival = Country.select(sc);
     City cityArrival = City.select(countryArrival, sc);
     Airport airportArrival = Airport.select(cityArrival, sc);
-    airportDeparture.flightMap = Airport.readFlightMap(airportDeparture, airportArrival);
+    airportDeparture.flightMap = Airport.readFlightMap(airportDeparture);
     airportDeparture.flightMap.entrySet().stream()
         .filter(x -> x.getValue().airportArrival.code.contains(airportArrival.code))
         .forEach(System.out::println);
-    addReservation(sc, airportDeparture, client);
+    System.out.print("Хотите забронировать рейс? (Y/n): ");
+    String choice = sc.nextLine();
+    if (choice.equals("Y") || choice.equals("y")) {
+      addReservation(sc, airportDeparture, client);
+    }
   }
 
   private static void addReservation(Scanner sc, Airport airportDeparture, Client client) {
@@ -99,7 +101,7 @@ public class ClientMenu {
     }
     Flight flight = airportDeparture.flightMap.get(num);
     flight.reservationList = Flight.readReservationList(flight);
-    System.out.println("Укажите кол-во мест для бронирования: ");
+    System.out.print("Укажите кол-во мест для бронирования: ");
     int amountPassenger = sc.nextInt();
     Reservation reservation = new Reservation(client.login, amountPassenger);
     reservation.priceTotal = flight.airplane.price * amountPassenger;
@@ -117,10 +119,12 @@ public class ClientMenu {
 
   public static void apply(Scanner sc) {
     String command = MenuMethods.selectMenu(description, sc);
-    if (!actions.containsKey(command)) {
-      throw new IllegalArgumentException("Некорректная команда: " + command);
+    while (!command.equals(LOGOUT)) {
+      if (!actions.containsKey(command)) {
+        throw new IllegalArgumentException("Некорректная команда: " + command);
+      }
+      Runnable action = actions.get(command);
+      action.run();
     }
-    Runnable action = actions.get(command);
-    action.run();
   }
 }
