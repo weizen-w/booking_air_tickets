@@ -26,7 +26,7 @@ public class ClientMenu {
   static {
     description.put(SEARCH_BOOKING, "Поиск и бронирование билетов");
     description.put(MY_BOOKINGS, "Мои бронирования");
-    description.put(LOGOUT, "Выйти в главное меню");
+    description.put(LOGOUT, "Выйти");
   }
 
   public static final Map<String, Runnable> actions = new LinkedHashMap<>();
@@ -34,6 +34,12 @@ public class ClientMenu {
   static {
     Client client = checkLogin();
     actions.put(SEARCH_BOOKING, () -> search(client));
+    actions.put(MY_BOOKINGS, () -> {
+      assert client != null;
+      client.readMyReservations();
+      client.showMyReservations();
+    });
+    actions.put(LOGOUT, () -> System.exit(0));
   }
 
   private ClientMenu() {
@@ -83,7 +89,7 @@ public class ClientMenu {
     Airport airportArrival = Airport.select(cityArrival, sc);
     airportDeparture.flightMap = Airport.readFlightMap(airportDeparture);
     airportDeparture.flightMap.entrySet().stream()
-        .filter(x -> x.getValue().airportArrival.code.contains(airportArrival.code))
+        .filter(x -> x.getValue().airportArrival.equals(airportArrival.code))
         .forEach(System.out::println);
     System.out.print("Хотите забронировать рейс? (Y/n): ");
     String choice = sc.nextLine();
@@ -108,7 +114,8 @@ public class ClientMenu {
     flight.airplane.seatFree -= amountPassenger;
     flight.reservationList.add(reservation);
     try {
-      WriteCSVFile.writeReservation(flight.filePathToReservations, flight.reservationList);
+      WriteCSVFile.writeReservation(flight.filePathToFlight, flight.reservationList);
+      WriteCSVFile.writeReservation(client, flight);
     } catch (IOException e) {
       throw new RuntimeException();
     }
@@ -119,12 +126,10 @@ public class ClientMenu {
 
   public static void apply(Scanner sc) {
     String command = MenuMethods.selectMenu(description, sc);
-    while (!command.equals(LOGOUT)) {
-      if (!actions.containsKey(command)) {
-        throw new IllegalArgumentException("Некорректная команда: " + command);
-      }
-      Runnable action = actions.get(command);
-      action.run();
+    if (!actions.containsKey(command)) {
+      throw new IllegalArgumentException("Некорректная команда: " + command);
     }
+    Runnable action = actions.get(command);
+    action.run();
   }
 }
