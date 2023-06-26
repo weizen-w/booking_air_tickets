@@ -9,6 +9,8 @@ import service.ReadCSVFile;
 
 public class City {
 
+  public static final String SEPARATOR = ";";
+
   public final String title;
   public final Country country;
   public final String cityFolder;
@@ -26,5 +28,9 @@ public class City {
   public static City select(Country country, Scanner sc) {
     String choice = MenuMethods.selectMenu(country.cityMap, sc);
     return new City(country.cityMap.get(choice), country);
+  }
+
+  public String writeToCSV() {
+    return title + SEPARATOR + country.writeToCSV();
   }
 }

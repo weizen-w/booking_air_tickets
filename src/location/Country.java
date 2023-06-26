@@ -22,6 +22,10 @@ public class Country {
     cityMap = ReadCSVFile.toMap(filePathToCities);
   }
 
+  public String writeToCSV() {
+    return title;
+  }
+
   public static Country select(Scanner sc) {
     String choice = MenuMethods.selectMenu(Database.countryMap, sc);
     return new Country(Database.countryMap.get(choice));
