@@ -1,5 +1,6 @@
 package service;
 
+import aviation.Flight;
 import database.Client;
 import database.Database;
 import database.Reservation;
@@ -42,6 +43,14 @@ public class WriteCSVFile {
     for (Reservation r : list) {
       writer.write(r.toWriteCSV() + "\n");
     }
+    writer.close();
+  }
+
+  public static void writeReservation(Client client, Flight flight) throws IOException {
+    String fileReservationOfClient =
+        FilePath.CLIENTS_FOLDER + client.login + FilePath.FILE_RESERVATIONS;
+    Writer writer = new FileWriter(fileReservationOfClient);
+    writer.write(flight.writeToCSV() + "\n");
     writer.close();
   }
 }
