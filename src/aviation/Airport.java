@@ -26,10 +26,6 @@ public class Airport {
     airportFolder = city.cityFolder + code + "/";
   }
 
-  public Airport(String code) {
-    this.code = code;
-  }
-
   public static Map<String, Flight> readFlightMap(Airport airportDeparture) {
     Scanner sc;
     try {
@@ -42,8 +38,8 @@ public class Airport {
       String line = sc.nextLine();
       String[] arrayLine = line.split(SEPARATOR);
       String number = arrayLine[0];
-      Airport airportDep = new Airport(arrayLine[1]);
-      Airport airportArr = new Airport(arrayLine[2]);
+      Airport airportDep = new Airport(arrayLine[1], airportDeparture.city);
+      String airportArr = arrayLine[2];
       Airplane airplane = new Airplane(arrayLine[3]);
       String timeDeparture = arrayLine[4];
       String timeArrival = arrayLine[5];
@@ -62,6 +58,10 @@ public class Airport {
   public static Airport select(City city, Scanner sc) {
     String choice = MenuMethods.selectMenu(city.airportList, sc);
     return new Airport(city.airportList.get(choice), city);
+  }
+
+  public String writeToCSV() {
+    return code + SEPARATOR + city.writeToCSV();
   }
 
   @Override

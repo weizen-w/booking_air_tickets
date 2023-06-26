@@ -14,6 +14,10 @@ public class Airplane {
     this.number = number;
   }
 
+  public String writeToCSV() {
+    return number;
+  }
+
   @Override
   public String toString() {
     return "number= " + number;

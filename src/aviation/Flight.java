@@ -18,7 +18,7 @@ public class Flight {
   private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
   public final String number;
   public final Airport airportDeparture;
-  public final Airport airportArrival;
+  public final String airportArrival;
   public Airplane airplane;
   public Date date = new Date();
   public Date timeDeparture;
@@ -26,9 +26,9 @@ public class Flight {
   public Date timeInFly;
 
   public List<Reservation> reservationList;
-  public String filePathToReservations;
+  public String filePathToFlight;
 
-  public Flight(String number, Airport airportDeparture, Airport airportArrival, Airplane airplane,
+  public Flight(String number, Airport airportDeparture, String airportArrival, Airplane airplane,
       String timeDeparture, String timeArrival) throws ParseException {
     this.number = number;
     this.airportDeparture = airportDeparture;
@@ -37,13 +37,13 @@ public class Flight {
     this.timeDeparture = timeFormat.parse(timeDeparture);
     this.timeArrival = timeFormat.parse(timeArrival);
     timeInFly = new Date(this.timeArrival.getTime() - this.timeDeparture.getTime());
-    filePathToReservations = airportDeparture.airportFolder + "/" + number + ".csv";
+    filePathToFlight = airportDeparture.airportFolder + "/" + number + ".csv";
   }
 
   public static List<Reservation> readReservationList(Flight flight) {
     Scanner sc;
     try {
-      sc = new Scanner(new FileReader(flight.filePathToReservations));
+      sc = new Scanner(new FileReader(flight.filePathToFlight));
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
@@ -60,6 +60,12 @@ public class Flight {
     }
     sc.close();
     return list;
+  }
+
+  public String writeToCSV() {
+    return number + SEPARATOR + airportDeparture.writeToCSV() + SEPARATOR
+        + airportArrival + SEPARATOR + airplane.writeToCSV() + SEPARATOR + timeFormat.format(
+        timeDeparture) + SEPARATOR + timeFormat.format(timeArrival);
   }
 
   @Override
